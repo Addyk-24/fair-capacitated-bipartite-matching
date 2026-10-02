@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fair-capacitated-bipartite-matching"
+version = "0.1.0"
+description = "Fair and Capacity-Constrained Bipartite Matching for CS3212 DAA Course Project"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Aditya Katkar", email = "aditya.katkar23@vit.edu" },
+    { name = "Om Karkele", email = "om.karkele23@vit.edu" },
+    { name = "Kartik Mandhane", email = "kartik.mandhane23@vit.edu" },
+    { name = "Yash Kashid", email = "yash.kashid23@vit.edu" },
+    { name = "Nikhil Kardile", email = "nikhil.kardile23@vit.edu" },
+]
+dependencies = [
+    "numpy>=1.26.0",
+    "scipy>=1.12.0",
+    "networkx>=3.2.0",
+    "pandas>=2.2.0",
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "flake8>=7.0.0",
+    "black>=24.2.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --strict-markers"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
