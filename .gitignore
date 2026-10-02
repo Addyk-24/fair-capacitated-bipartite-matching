@@ -1,92 +1,58 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
+# Compiled binaries, object files, and libraries
+*.o
+*.obj
+*.exe
+*.dll
 *.so
+*.dylib
+*.a
+*.lib
+*.pdb
+*.ilk
 
-# Distribution / packaging
-.Python
+# CMake and build directories
 build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
+bin/
 lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+out/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
 
-# Virtual environments
-venv/
-.venv/
-env/
-.env/
-ENV/
-env.bak/
-venv.bak/
+# Clang / Compiler tooling artifacts
+compile_commands.json
+.cache/
+.clang-format-working-copy
 
-# Unit-test / coverage reporting
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
-
-# IDE and Editor configurations
-.vscode/
+# IDE & Editor files
+.vscode/*
 !.vscode/settings.json
-!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
 .idea/
-*.sublime-project
-*.sublime-workspace
-*.swp
-*.swo
-*~
-
-# Operating system files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
+*.suo
+*.user
+*.userosv
+*.sln.docstates
+.vs/
 Thumbs.db
+.DS_Store
 
-# Heavy or generated experimental data and output artifacts
+# Output results and runtime logs (tracked via .gitkeep)
+results/figures/*
+!results/figures/.gitkeep
+results/tables/*
+!results/tables/.gitkeep
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
-data/synthetic/*
-!data/synthetic/.gitkeep
-results/tables/*
-!results/tables/.gitkeep
-results/plots/*
-!results/plots/.gitkeep
-results/metrics/*
-!results/metrics/.gitkeep
 
-# Local logs and environment overrides
+# Local experiment logs
 *.log
-.env.local
+experiments/*.pyc
+experiments/__pycache__/
