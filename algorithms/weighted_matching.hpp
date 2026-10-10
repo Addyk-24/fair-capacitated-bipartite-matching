@@ -1,3 +1,4 @@
+
 #ifndef WEIGHTED_MATCHING_HPP
 #define WEIGHTED_MATCHING_HPP
 
@@ -23,7 +24,9 @@ struct Assignment {
 };
 
 struct UtilityMatrix {
-    std::vector<std::vector<int>> values;
+    // -1 represents an ineligible agent-resource pair.
+    // Eligible utilities must be in the range 1 through 100.
+    std::vector<std::vector<int> > values;
     std::vector<std::string> agents;
     std::vector<std::string> resources;
 };
@@ -35,8 +38,14 @@ struct WeightedMatchingResult {
     double runtime_ms;
 };
 
+// Constructs the utility matrix.
+// Throws std::invalid_argument for invalid utilities,
+// duplicate edges, or edges referencing unknown IDs.
 UtilityMatrix buildUtilityMatrix(const WeightedGraph& graph);
 
+// Maximizes total utility, allowing agents to remain unmatched.
+// Every returned pair is eligible, and each agent/resource appears
+// in at most one returned assignment.
 WeightedMatchingResult solveMaximumWeightMatching(
     const WeightedGraph& graph
 );
