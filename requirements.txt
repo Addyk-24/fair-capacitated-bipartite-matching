@@ -1,0 +1,5 @@
+# Python is used only for plotting and summarising the CSV results in notebooks/.
+# All matching, flow and fairness code is C++ (see CMakeLists.txt).
+pandas>=2.2.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
