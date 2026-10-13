@@ -150,7 +150,9 @@ void testFullPipelineAndResultsFile() {
         CHECK(lines[1].find("dataset_a,greedy_reference,1,300,25,") == 0);
         CHECK(lines[2].find("dataset_a,greedy_reference,2,300,25,") == 0);
         CHECK(lines[1].find(",NA,") != std::string::npos);  // fairness not computed yet
-        CHECK(lines[1][lines[1].size() - 1] == '1');        // valid flag
+        // ...,runtime_ms,valid,instance_hash: valid flag is 1, hash is 16 hex digits
+        CHECK(lines[1].find(",1,", lines[1].size() - 20) != std::string::npos);
+        CHECK_EQ(lines[1].size() - lines[1].find_last_of(',') - 1, static_cast<size_t>(16));
     }
 
     std::remove(csv.c_str());

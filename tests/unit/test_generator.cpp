@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "fingerprint.hpp"
 #include "generator.hpp"
 #include "test_support.hpp"
 #include "validation.hpp"
@@ -65,19 +66,7 @@ void testGoldenFingerprint() {
     cfg.seed = 7;
     const Instance inst = make(cfg);
 
-    uint64_t h = 1469598103934665603ULL;  // FNV-1a over every field
-    const auto mix = [&h](int64_t v) {
-        h ^= static_cast<uint64_t>(v);
-        h *= 1099511628211ULL;
-    };
-    for (size_t i = 0; i < inst.group_id.size(); ++i) mix(inst.group_id[i]);
-    for (size_t i = 0; i < inst.capacity.size(); ++i) mix(inst.capacity[i]);
-    for (size_t i = 0; i < inst.edges.size(); ++i) {
-        mix(inst.edges[i].agent_id);
-        mix(inst.edges[i].resource_id);
-        mix(inst.edges[i].utility);
-    }
-    CHECK_EQ(h, 0x7ac9a3d05a593d07ULL);
+    CHECK_EQ(instanceFingerprint(inst), 0x7ac9a3d05a593d07ULL);
 }
 
 void testCapacityModes() {
