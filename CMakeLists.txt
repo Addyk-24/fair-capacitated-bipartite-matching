@@ -17,7 +17,9 @@ file(GLOB DAA_CORE_SOURCES CONFIGURE_DEPENDS src/*.cpp)
 file(GLOB DAA_ALGORITHM_SOURCES CONFIGURE_DEPENDS algorithms/*.cpp)
 
 add_library(daa_core STATIC ${DAA_CORE_SOURCES} ${DAA_ALGORITHM_SOURCES})
-target_include_directories(daa_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(daa_core
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/algorithms)  # adapters include solver headers by bare name
 
 if(MSVC)
   target_compile_options(daa_core PUBLIC /W4)
@@ -31,21 +33,50 @@ target_link_libraries(matching_runner PRIVATE daa_core)
 add_executable(dataset_generator experiments/runners/dataset_generator.cpp)
 target_link_libraries(dataset_generator PRIVATE daa_core)
 
+add_executable(experiment_suite experiments/runners/experiment_suite.cpp)
+target_link_libraries(experiment_suite PRIVATE daa_core)
+
 if(DAA_BUILD_TESTS)
   enable_testing()
 
-  # One executable per test file; name = file stem. Run from the build directory,
-  # where tests may create scratch folders (test_tmp_*).
+  # One executable per test file; name = file stem. Tests run from the build
+  # directory, where they may create scratch folders (test_tmp_*).
   set(DAA_TEST_SOURCES
     tests/unit/test_generator.cpp
     tests/unit/test_validation.cpp
     tests/unit/test_instance_io.cpp
+    tests/unit/test_hooks.cpp
+    tests/unit/test_weighted_matching.cpp
     tests/integration/test_pipeline.cpp
+    tests/integration/test_suite.cpp
+    tests/integration/test_weighted_adapter.cpp
   )
-  foreach(test_source IN LISTS DAA_TEST_SOURCES)
+  # These read repository files (e.g. data/weighted/small_weighted.csv) by relative
+  # path, so they run from the source directory.
+  set(DAA_SOURCE_DIR_TEST_SOURCES
+    tests/unit/test_weighted_matrix.cpp
+  )
+
+  foreach(test_source IN LISTS DAA_TEST_SOURCES DAA_SOURCE_DIR_TEST_SOURCES)
     get_filename_component(test_name ${test_source} NAME_WE)
     add_executable(${test_name} ${test_source})
     target_link_libraries(${test_name} PRIVATE daa_core)
-    add_test(NAME ${test_name} COMMAND ${test_name})
+    # Some tests use assert(). Release defines NDEBUG, which would turn every assert
+    # into a no-op and let broken code pass, so keep assertions on in tests.
+    if(MSVC)
+      target_compile_options(${test_name} PRIVATE /UNDEBUG)
+    else()
+      target_compile_options(${test_name} PRIVATE -UNDEBUG)
+    endif()
+    if(test_source IN_LIST DAA_SOURCE_DIR_TEST_SOURCES)
+      add_test(NAME ${test_name} COMMAND ${test_name} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    else()
+      add_test(NAME ${test_name} COMMAND ${test_name})
+    endif()
   endforeach()
+
+  # End-to-end smoke test of the real command-line tool on a tiny sweep.
+  add_test(NAME smoke_suite
+    COMMAND experiment_suite --config ${CMAKE_CURRENT_SOURCE_DIR}/experiments/configs/smoke.cfg
+            --out smoke_results --overwrite)
 endif()
