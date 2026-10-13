@@ -21,4 +21,10 @@ namespace daa {
 // Time O(E log E), space O(E).
 MatchingResult runGreedyReference(const Instance& inst);
 
+// Maximum-weight matching (Hungarian, algorithms/weighted_matching.*) at capacity 1:
+// each resource is used at most once regardless of its capacity; zero-capacity
+// resources are never used. Requires utilities in 1..100. Adapter: weighted_adapter.cpp.
+// Time O(E(A+R) + AR + k^2 l) with k = min(A,R), l = max(A,R); space O(AR).
+MatchingResult runWeighted(const Instance& inst);
+
 }  // namespace daa

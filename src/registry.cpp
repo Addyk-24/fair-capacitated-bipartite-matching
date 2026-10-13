@@ -34,6 +34,7 @@ std::vector<std::string> algorithmNames() {
 
 void registerBuiltinAlgorithms() {
     registerAlgorithm("greedy_reference", runGreedyReference);
+    registerAlgorithm("weighted", runWeighted);
     // One line per stage as it lands, e.g.:
     //   registerAlgorithm("cardinality", runCardinality);
 }
