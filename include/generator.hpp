@@ -47,6 +47,10 @@ bool parseCapacityMode(const std::string& name, CapacityMode& out);
 std::string toString(UtilityDist d);
 std::string toString(CapacityMode m);
 
+// "key=value" lines holding every field of the config, enough to regenerate the
+// dataset. Stored as config.txt next to generated datasets.
+std::string describeConfig(const GeneratorConfig& cfg);
+
 // Returns "" if the config is usable, otherwise a human-readable reason.
 std::string validateConfig(const GeneratorConfig& cfg);
 

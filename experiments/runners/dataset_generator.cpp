@@ -1,6 +1,5 @@
 // dataset_generator: write a reproducible synthetic dataset directory.
 #include <iostream>
-#include <sstream>
 #include <string>
 
 #include "cli.hpp"
@@ -110,18 +109,8 @@ int main(int argc, char** argv) {
         return 2;
     }
 
-    // Everything needed to regenerate the dataset, stored next to it.
-    std::ostringstream meta;
-    meta << "agents=" << cfg.agents << "\nresources=" << cfg.resources
-         << "\ndensity=" << cfg.density << "\npopularity_skew=" << cfg.popularity_skew
-         << "\nutility_dist=" << daa::toString(cfg.utility_dist)
-         << "\nutility_min=" << cfg.utility_min << "\nutility_max=" << cfg.utility_max
-         << "\ncapacity_mode=" << daa::toString(cfg.capacity_mode)
-         << "\nfixed_capacity=" << cfg.fixed_capacity << "\ngroups=" << cfg.groups
-         << "\ngroup_skew=" << cfg.group_skew << "\nseed=" << cfg.seed << "\n";
-
     const std::string out = args.get("out");
-    err = daa::writeInstance(out, inst, meta.str());
+    err = daa::writeInstance(out, inst, daa::describeConfig(cfg));
     if (!err.empty()) {
         std::cerr << "error: " << err << "\n";
         return 1;

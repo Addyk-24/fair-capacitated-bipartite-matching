@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -125,6 +126,18 @@ std::string toString(CapacityMode m) {
         case CapacityMode::Fixed: return "fixed";
     }
     return "balanced";
+}
+
+std::string describeConfig(const GeneratorConfig& cfg) {
+    std::ostringstream meta;
+    meta << "agents=" << cfg.agents << "\nresources=" << cfg.resources
+         << "\ndensity=" << cfg.density << "\npopularity_skew=" << cfg.popularity_skew
+         << "\nutility_dist=" << toString(cfg.utility_dist)
+         << "\nutility_min=" << cfg.utility_min << "\nutility_max=" << cfg.utility_max
+         << "\ncapacity_mode=" << toString(cfg.capacity_mode)
+         << "\nfixed_capacity=" << cfg.fixed_capacity << "\ngroups=" << cfg.groups
+         << "\ngroup_skew=" << cfg.group_skew << "\nseed=" << cfg.seed << "\n";
+    return meta.str();
 }
 
 std::string validateConfig(const GeneratorConfig& cfg) {
