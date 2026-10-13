@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <string>
 
 #include "common.hpp"
@@ -16,14 +17,34 @@ struct RunRecord {
     int32_t agents = 0;
     int32_t resources = 0;
     size_t edges = 0;
-    bool valid = false;           // validateResult passed
-    std::string validation_error; // empty when valid
-    MatchingResult result;        // algorithm_name and runtime_milliseconds always set
+    uint64_t instance_hash = 0;    // instanceFingerprint of the dataset the algorithm received
+    bool valid = false;            // every result check passed and the algorithm did not throw
+    std::string validation_error;  // empty when valid
+    MatchingResult result;         // algorithm_name and runtime_milliseconds always set
 };
+
+// --- Hooks --------------------------------------------------------------------------
+
+// Extra result check, run after the built-in validateResult on every run. Return ""
+// if the result is acceptable, otherwise a message. Use it for rules that only some
+// stages have (for example "fairness constraint satisfied"). A failing check marks
+// the run invalid and its message is recorded as "<name>: <message>".
+using ResultCheckFn = std::function<std::string(const Instance&, const MatchingResult&)>;
+void addResultCheck(const std::string& name, ResultCheckFn fn);
+void clearResultChecks();
+
+// Fairness metric computed from the instance and a valid result. Until a metric is
+// set, fairness_score stays at -1 and is logged as NA. If an algorithm already set
+// fairness_score (>= 0) it is left alone. Pass nullptr to remove the metric.
+using FairnessMetricFn = std::function<double(const Instance&, const MatchingResult&)>;
+void setFairnessMetric(FairnessMetricFn fn);
+
+// --- Running and logging ------------------------------------------------------------
 
 // Runs `fn` once on `inst`, measures wall-clock time around the call only (not
 // validation), then validates the output. The measured time replaces whatever
 // runtime the algorithm reported so every algorithm is timed the same way.
+// An exception thrown by the algorithm is caught and recorded as an invalid run.
 RunRecord runOnce(const Instance& inst, const std::string& dataset_name,
                   const std::string& algorithm_name, const AlgorithmFn& fn, int32_t repeat);
 
