@@ -35,6 +35,8 @@ std::vector<std::string> algorithmNames() {
 void registerBuiltinAlgorithms() {
     registerAlgorithm("greedy_reference", runGreedyReference);
     registerAlgorithm("weighted", runWeighted);
+    registerAlgorithm("capacitated_flow", runCapacitatedFlow);
+    registerAlgorithm("capacitated_flow_maxcard", runCapacitatedFlowMaxCardinality);
     // One line per stage as it lands, e.g.:
     //   registerAlgorithm("cardinality", runCardinality);
 }

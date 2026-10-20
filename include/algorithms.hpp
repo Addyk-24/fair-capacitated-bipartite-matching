@@ -27,4 +27,14 @@ MatchingResult runGreedyReference(const Instance& inst);
 // Time O(E(A+R) + AR + k^2 l) with k = min(A,R), l = max(A,R); space O(AR).
 MatchingResult runWeighted(const Instance& inst);
 
+// Capacity-constrained allocation by min-cost flow (algorithms/capacitated_flow.cpp).
+// runCapacitatedFlow maximizes total utility (same objective as runWeighted, but
+// resources accept up to capacity[v] agents; agents may stay unassigned).
+// runCapacitatedFlowMaxCardinality is classic min-cost MAX-flow: it assigns the maximum
+// possible number of agents first, then maximizes utility among those allocations.
+// Time O(F * V * E) worst case (F = flow value, V = A + R + 2, E = edges + A + R),
+// space O(V + E).
+MatchingResult runCapacitatedFlow(const Instance& inst);
+MatchingResult runCapacitatedFlowMaxCardinality(const Instance& inst);
+
 }  // namespace daa
