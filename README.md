@@ -107,18 +107,50 @@ Each run is validated (eligible edges only, one assignment per agent, capacities
 respected, totals consistent) and appended to the results CSV with its wall-clock
 runtime. On Windows with MSVC the executables are in `build\Release\`.
 
+### Run a whole experiment
+
+```bash
+# Every parameter in the config can be a comma-separated list; the suite runs the
+# full cross product on identical datasets and writes results by size and setting.
+./build/experiment_suite --config experiments/configs/smoke.cfg --dry-run   # list datasets
+./build/experiment_suite --config experiments/configs/week3_scaling.cfg
+# -> results/metrics/week3_scaling/n<agents>_m<resources>/<parameter tag>/runs.csv
+```
+
+Config keys, output layout and the hooks for extra result checks and the fairness
+metric are documented in
+[docs/specifications/dataset_format.md](docs/specifications/dataset_format.md).
+Existing results are never overwritten unless you pass `--overwrite`.
+
+### Reproduce the Week 4 results
+
+```bash
+python experiments/run_week4.py --suite build/experiment_suite   # runs experiments/configs/week4_*.cfg
+```
+
+This runs the five Week 4 experiments (scaling in agents and resources, capacity regimes,
+utility distribution x density, group distributions), writes raw rows to
+`results/metrics/<experiment>/...`, then builds processed tables in `results/tables/` and
+figures in `results/figures/` with `notebooks/analyze_results.py` (needs the packages in
+`requirements.txt`). The analysis checks first that every run is valid, that all algorithms
+received the identical instance, and that results are stable across repeats. The
+interpretation of the current results is in
+[docs/results_interpretation.md](docs/results_interpretation.md).
+
 ---
 
 ## 6. Status
 
 | Stage | Owner | State |
 | :--- | :--- | :--- |
-| Repository, dataset format, generator, runner, validators | Aditya | Week 1–2 done |
+| Repository, dataset format, generator, runner, validators | Aditya | done |
+| Experiment suite (config sweeps, seeds, result layout, hooks) | Aditya | Week 3 done |
+| Master experiment matrix, analysis scripts, tables, plots, interpretation | Aditya | Week 4 done for the merged stages; rerun when cardinality and fairness land |
 | `greedy_reference` (non-optimal sanity baseline, not a project stage) | Aditya | done |
-| Maximum cardinality (`cardinality`) | Om | in progress |
-| Maximum weight (`weighted`) | Kartik | in progress |
-| Capacity-constrained min-cost max-flow (`capacitated_flow`) | Yash | in progress |
-| Fairness-aware stage and metric | Nikhil / team | Week 3 |
+| Maximum cardinality (`cardinality`) | Om | problem definition on `main`; algorithm not yet merged |
+| Maximum weight (`weighted`) | Kartik | merged; runnable through an adapter (capacity-1 stage) |
+| Capacity-constrained min-cost flow (`capacitated_flow`, `capacitated_flow_maxcard`) | Yash | merged |
+| Fairness-aware stage and metric | Nikhil / team | not yet merged (runner hook ready) |
 
 Contribution rules (branches, commits, pull requests, reviews, code constraints) are in
 [CONTRIBUTING.md](CONTRIBUTING.md).
