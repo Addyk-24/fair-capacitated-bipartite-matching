@@ -1,0 +1,14 @@
+| experiment | variable | algorithm | exponent | r_squared | points |
+| --- | --- | --- | --- | --- | --- |
+| week4_scaling | agents | capacitated_flow | 1.904 | 0.995 | 6 |
+| week4_scaling | agents | capacitated_flow_maxcard | 1.951 | 0.997 | 6 |
+| week4_scaling | agents | cardinality | 0.974 | 0.989 | 6 |
+| week4_scaling | agents | fairness | 1.930 | 0.999 | 6 |
+| week4_scaling | agents | greedy_reference | 1.126 | 0.997 | 6 |
+| week4_scaling | agents | weighted | 1.622 | 0.976 | 6 |
+| week4_scaling_resources | resources | capacitated_flow | 0.715 | 0.964 | 6 |
+| week4_scaling_resources | resources | capacitated_flow_maxcard | 0.688 | 0.969 | 6 |
+| week4_scaling_resources | resources | cardinality | 1.445 | 0.944 | 6 |
+| week4_scaling_resources | resources | fairness | 0.709 | 0.970 | 6 |
+| week4_scaling_resources | resources | greedy_reference | 1.166 | 0.980 | 6 |
+| week4_scaling_resources | resources | weighted | 1.138 | 0.949 | 6 |

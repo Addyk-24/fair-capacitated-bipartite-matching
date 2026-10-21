@@ -1,0 +1,14 @@
+| experiment | size_parameter | algorithm | empirical_exponent | r_squared | size_points |
+| --- | --- | --- | --- | --- | --- |
+| skill_scaling_agents | agents | capacitated_flow | 1.732 | 0.998 | 4 |
+| skill_scaling_agents | agents | capacitated_flow_maxcard | 1.813 | 1.000 | 4 |
+| skill_scaling_agents | agents | cardinality | 1.005 | 0.991 | 4 |
+| skill_scaling_agents | agents | fairness | 1.992 | 0.993 | 4 |
+| skill_scaling_agents | agents | greedy_reference | 1.366 | 0.960 | 4 |
+| skill_scaling_agents | agents | weighted | 1.816 | 0.919 | 4 |
+| skill_scaling_projects | projects | capacitated_flow | 0.574 | 1.000 | 4 |
+| skill_scaling_projects | projects | capacitated_flow_maxcard | 0.581 | 0.999 | 4 |
+| skill_scaling_projects | projects | cardinality | 1.094 | 0.989 | 4 |
+| skill_scaling_projects | projects | fairness | 0.691 | 0.995 | 4 |
+| skill_scaling_projects | projects | greedy_reference | 0.982 | 0.999 | 4 |
+| skill_scaling_projects | projects | weighted | 0.940 | 0.947 | 4 |

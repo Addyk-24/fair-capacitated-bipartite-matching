@@ -1,0 +1,13 @@
+experiment,variable,algorithm,exponent,r_squared,points
+week4_scaling,agents,capacitated_flow,1.9044106554365725,0.9951773149887901,6
+week4_scaling,agents,capacitated_flow_maxcard,1.95059527146075,0.9971502802304351,6
+week4_scaling,agents,cardinality,0.9740500188549058,0.9892006015533975,6
+week4_scaling,agents,fairness,1.9303509533395862,0.9994102351575547,6
+week4_scaling,agents,greedy_reference,1.1257018994665633,0.9965207958388119,6
+week4_scaling,agents,weighted,1.6222313299587467,0.9763084712917046,6
+week4_scaling_resources,resources,capacitated_flow,0.714574584458036,0.9644077101626649,6
+week4_scaling_resources,resources,capacitated_flow_maxcard,0.6880108309969691,0.9686561877598715,6
+week4_scaling_resources,resources,cardinality,1.4451467816647137,0.94413544513158,6
+week4_scaling_resources,resources,fairness,0.7089079774316399,0.9702818169605586,6
+week4_scaling_resources,resources,greedy_reference,1.1659978302311473,0.9797247712954762,6
+week4_scaling_resources,resources,weighted,1.1375273693558987,0.9486998210813014,6

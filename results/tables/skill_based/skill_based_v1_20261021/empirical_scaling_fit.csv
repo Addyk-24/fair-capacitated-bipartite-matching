@@ -1,0 +1,13 @@
+experiment,size_parameter,algorithm,empirical_exponent,r_squared,size_points
+skill_scaling_agents,agents,capacitated_flow,1.7315313961560586,0.9978048609504229,4
+skill_scaling_agents,agents,capacitated_flow_maxcard,1.8129173847862097,0.9997631560704247,4
+skill_scaling_agents,agents,cardinality,1.005313091557405,0.9913596553844428,4
+skill_scaling_agents,agents,fairness,1.9923358637639157,0.9925303104138392,4
+skill_scaling_agents,agents,greedy_reference,1.3663068863732637,0.9600893072976225,4
+skill_scaling_agents,agents,weighted,1.8156133697999561,0.9192404560920259,4
+skill_scaling_projects,projects,capacitated_flow,0.5740262232787393,0.9997933591299902,4
+skill_scaling_projects,projects,capacitated_flow_maxcard,0.5813760270728882,0.9990737568241043,4
+skill_scaling_projects,projects,cardinality,1.0941198653969786,0.9886360757006046,4
+skill_scaling_projects,projects,fairness,0.691231612027377,0.9949772598108383,4
+skill_scaling_projects,projects,greedy_reference,0.9816095496939921,0.9990159502603584,4
+skill_scaling_projects,projects,weighted,0.9397264826299472,0.9468384876019706,4

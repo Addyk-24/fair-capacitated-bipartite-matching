@@ -37,33 +37,61 @@ compile_commands.json
 Thumbs.db
 .DS_Store
 
-# Python (plotting scripts and notebooks only)
+# Python environments and caches
 .venv/
 venv/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
-# Generated data and results (folders stay tracked through .gitkeep).
-# Raw results are reproducible from a dataset + config, so they are not committed;
-# hand-made sample datasets (data/synthetic/sample_*) are.
+# Generated data: keep directories tracked through .gitkeep
+# Raw and processed datasets are reproducible and remain untracked
 data/raw/*
 !data/raw/.gitkeep
+
 data/processed/*
 !data/processed/.gitkeep
+
+# Keep synthetic sample datasets
 data/synthetic/*
 !data/synthetic/.gitkeep
 !data/synthetic/sample_*/
+
+# Ignore generated skill-based input data
 data/skill_based/*
 !data/skill_based/.gitkeep
+
+# Results: ignore generated outputs by default
+# Keep directory placeholders
 results/metrics/*
 !results/metrics/.gitkeep
+
 results/plots/*
 !results/plots/.gitkeep
+
 results/figures/*
 !results/figures/.gitkeep
+
 results/tables/*
 !results/tables/.gitkeep
+
+# Track final figures for project submission
+# Includes PNG, PDF, and other final figure files directly in figures/
+!results/figures/*.png
+!results/figures/*.pdf
+!results/figures/*.svg
+
+# Track final skill-based experiment figures and tables
+!results/figures/skill_based/
+!results/figures/skill_based/**
+!results/tables/skill_based/
+!results/tables/skill_based/**
+
+# Track curated final result tables and reports
+!results/tables/*.csv
+!results/tables/*.json
+!results/tables/*.md
+!results/tables/*.pdf
 
 # Logs
 *.log
