@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "cli.hpp"
+#include "algorithms.hpp"
 #include "experiment.hpp"
 #include "instance_io.hpp"
 #include "registry.hpp"
@@ -101,6 +102,27 @@ int main(int argc, char** argv) {
     const std::string datasetName = daa::baseName(input);
     std::cout << "dataset " << datasetName << ": " << inst.num_agents << " agents, "
               << inst.num_resources << " resources, " << inst.edges.size() << " edges\n";
+
+    std::vector<char> studentHasEdge(static_cast<size_t>(inst.num_agents), 0);
+    std::vector<char> projectHasEdge(static_cast<size_t>(inst.num_resources), 0);
+    for (size_t i = 0; i < inst.edges.size(); ++i) {
+        studentHasEdge[static_cast<size_t>(inst.edges[i].agent_id)] = 1;
+        projectHasEdge[static_cast<size_t>(inst.edges[i].resource_id)] = 1;
+    }
+    int32_t studentsWithoutProjects = 0;
+    int32_t projectsWithoutStudents = 0;
+    for (size_t i = 0; i < studentHasEdge.size(); ++i) studentsWithoutProjects += !studentHasEdge[i];
+    for (size_t i = 0; i < projectHasEdge.size(); ++i) projectsWithoutStudents += !projectHasEdge[i];
+    const daa::MatchingResult feasibility = daa::runCapacitatedFlowMaxCardinality(inst);
+    std::cout << "feasibility: eligible_edges=" << inst.edges.size()
+              << ", students_without_eligible_projects=" << studentsWithoutProjects
+              << ", projects_without_eligible_students=" << projectsWithoutStudents
+              << ", maximum_feasible_assignments=" << feasibility.total_assigned_agents << "\n";
+    if (feasibility.total_assigned_agents < inst.num_agents) {
+        std::cout << "assignment opportunity: capacity and eligibility permit assignments for "
+                  << feasibility.total_assigned_agents << " of " << inst.num_agents
+                  << " students; some students will remain unassigned\n";
+    }
 
     int exitCode = 0;
     for (size_t i = 0; i < algos.size(); ++i) {

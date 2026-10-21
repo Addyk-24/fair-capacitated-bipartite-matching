@@ -6,6 +6,13 @@
 analysis integrity check reported all rows valid, identical instance hashes across
 algorithms on each dataset, and stable allocation outcomes across repeats.
 
+**Utility-model scope:** Week 4 used synthetic graph utilities sampled from each config's
+utility distribution; it did not generate utilities from the previous or current
+student–project converter. The recorded algorithm findings remain observations about
+those synthetic inputs, but they do not test the weighted-skill model or support
+student–project conclusions. No rerun or new benchmark result is claimed here.
+Application-specific conclusions require a separate run using the current converter.
+
 Derived tables are in `results/tables/`; plots are in `results/figures/`. Exact per-run
 measurements are in `results/metrics/`. The configs, algorithms, seed values, and
 analysis script are the source of record; runtime values depend on the machine and

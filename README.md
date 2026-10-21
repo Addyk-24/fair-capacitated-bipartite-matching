@@ -16,7 +16,7 @@ $$\text{Agents } (U) \longrightarrow \text{Utility } (w_{ij}) \longrightarrow \t
 ### Algorithmic Progression
 
 1. **Maximum-Cardinality Baseline:** Baseline feasibility matching enforcing the one-assignment-per-agent constraint.
-2. **Maximum-Weight Matching:** Preference- and utility-aware assignment maximizing total allocation weight.
+2. **Maximum-Weight Matching:** Utility-aware assignment maximizing total allocation weight.
 3. **Capacity-Constrained Matching:** Network flow formulation (Min-Cost Max-Flow) handling multi-capacity resources ($c_j \ge 1$).
 4. **Fairness-Aware Optimization:** Maximum cardinality, then maximum minimum assigned utility, with total utility as a tie-break.
 5. **Empirical Benchmarks:** Scalability profiles, theoretical complexity verification, runtime trade-offs, and allocation distributions.
@@ -29,7 +29,7 @@ $$\text{Agents } (U) \longrightarrow \text{Utility } (w_{ij}) \longrightarrow \t
 | :--- | :--- | :--- | :--- |
 | **30** | Nikhil Kardile | Fairness metrics, literature review, metric evaluation | `nikhil/fairness-metrics` |
 | **31** | Om Karkele | Cardinality baseline, formal problem modeling, complexity proofs | `om/cardinality-baseline` |
-| **33** | Kartik Mandhane | Utility modeling, maximum-weight matching, preference schemas | `kartik/weighted-matching` |
+| **33** | Kartik Mandhane | Utility modeling, maximum-weight matching, weighted skill schema | `kartik/weighted-matching` |
 | **35** | Yash Kashid | Resource-capacity modeling, min-cost max-flow network formulation | `yash/capacity-flow` |
 | **39** | Aditya Katkar | Repository architecture, dataset generator, benchmark pipeline | `aditya/repo-experiments` |
 
@@ -53,6 +53,7 @@ The input/output contract every algorithm must follow is in
 [docs/specifications/dataset_format.md](docs/specifications/dataset_format.md). The student–project
 application and named-skill conversion are specified in
 [docs/specifications/student_project_application.md](docs/specifications/student_project_application.md).
+The current formal model is in [docs/formal_problem_definition.md](docs/formal_problem_definition.md).
 
 ---
 
@@ -151,8 +152,12 @@ python applications/convert_student_projects.py data/student_projects/example da
 ./build/matching_runner --input data/synthetic/student_project_example --algo all --output results/metrics/student_project_example.csv
 ```
 
-Eligibility, the integer 1–100 utility formula, capacities and group mapping are
-documented in [the application specification](docs/specifications/student_project_application.md).
+Project skills use one weighted JSON list with a mandatory flag. Mandatory
+qualifications and the configurable minimum
+coverage threshold (default 35%) determine eligibility before optimization. Weighted
+coverage gives integer utility in [0, 100], including valid zero-utility edges. The
+three-mandatory-skill cap, validation rules, capacities, group mapping and worked
+formula are documented in [the application specification](docs/specifications/student_project_application.md).
 
 ## 7. Algorithm objectives and status
 
@@ -163,7 +168,7 @@ Complexity and comparison semantics are summarized in
 | :--- | :--- | :--- |
 | Repository, dataset format, generator, runner, validators | Aditya | done |
 | Experiment suite (config sweeps, seeds, result layout, hooks) | Aditya | Week 3 done |
-| Master experiment matrix, analysis scripts, tables, plots, interpretation | Aditya | Week 4 matrix rerun after integration |
+| Master experiment matrix, analysis scripts, tables, plots, interpretation | Aditya | Week 4 matrix completed on 2026-10-21; results use synthetic utility distributions, not skill-derived utilities |
 | `greedy_reference` (non-optimal sanity baseline, not a project stage) | Aditya | done |
 | Maximum cardinality (`cardinality`) | Om | implemented; capacity-one augmenting paths |
 | Maximum weight (`weighted`) | Kartik | merged; runnable through an adapter (capacity-1 stage) |

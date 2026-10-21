@@ -8,7 +8,9 @@
 // allocation. Every agent has a single unit-capacity source arc, so it is assigned at
 // most once, and the c_v sink arc guarantees resource v never exceeds its capacity.
 //
-// Two objectives, both solved by successive shortest augmenting paths (SPFA):
+// Both objectives use successive shortest augmenting paths. An SPFA pass initializes
+// potentials for negative utility costs; later shortest paths use Dijkstra with
+// nonnegative reduced costs.
 //
 //   runCapacitatedFlow ("capacitated_flow") - maximum total utility.
 //     cost(u,v) = -w_uv. Augment while the cheapest S-T path has negative cost, then stop.
@@ -24,13 +26,14 @@
 //     with F fixed at the maximum flow. Minimizing cost therefore maximizes utility among
 //     all allocations that assign the maximum possible number of agents.
 //
-// Complexity (both): at most F <= min(A, sum c_v) augmentations. Each SPFA is
-//   O(V * E) worst case with V = A + R + 2 and E = |edges| + A + R, so the total is
-//   O(F * V * E) worst case. Auxiliary space O(V + E).
+// Complexity (both): at most F <= min(A, sum c_v) augmentations. Initial potentials
+// cost O(VE) worst case with SPFA; each augmentation costs O(E log V) with Dijkstra,
+// where V = A + R + 2 and E = |edges| + A + R. Total O(VE + F E log V), auxiliary
+// space O(V + E).
 // Edge cases verified in tests: empty instance, no edges, zero-capacity resources,
 //   isolated agents, capacity 1 (matching), capacity >= A (capacity never binds).
-// Determinism: arcs are added in input order and SPFA uses a FIFO queue with strict
-//   comparisons, so the same instance always yields the same allocation.
+// Determinism: arcs are added in input order and priority-queue ties are ordered by
+//   node id, so the same instance always yields the same allocation.
 #include <cstddef>
 #include <cstdint>
 #include <limits>

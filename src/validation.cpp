@@ -44,6 +44,10 @@ std::string validateInstance(const Instance& inst) {
             err << "edge " << i << " (" << e.agent_id << "," << e.resource_id << ") is out of range";
             return err.str();
         }
+        if (e.utility < 0 || e.utility > 100) {
+            err << "edge " << i << " utility " << e.utility << " is outside [0, 100]";
+            return err.str();
+        }
         if (i > 0 && !edgeLess(inst.edges[i - 1], e.agent_id, e.resource_id)) {
             err << "edge " << i << " (" << e.agent_id << "," << e.resource_id
                 << ") is duplicated or not sorted by (agent_id, resource_id)";

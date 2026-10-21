@@ -25,7 +25,7 @@ struct Assignment {
 
 struct UtilityMatrix {
     // -1 represents an ineligible agent-resource pair.
-    // Eligible utilities must be in the range 1 through 100.
+    // Eligible utilities must be in the range 0 through 100; -1 is the absent-edge sentinel.
     std::vector<std::vector<int> > values;
     std::vector<std::string> agents;
     std::vector<std::string> resources;

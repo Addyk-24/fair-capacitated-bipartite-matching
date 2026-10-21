@@ -1,4 +1,4 @@
-project_id,capacity,required_skills,preferred_skills
-p0,1,"C++,algorithms","graph theory"
-p1,2,"Python","statistics,optimization"
-p2,1,"statistics,optimization","Python"
+project_id,capacity,minimum_coverage,skills
+p0,1,35,"[{""name"":""C++"",""weight"":35,""mandatory"":true},{""name"":""algorithms"",""weight"":25,""mandatory"":true},{""name"":""graph theory"",""weight"":25,""mandatory"":false},{""name"":""optimization"",""weight"":15,""mandatory"":false}]"
+p1,2,,"[{""name"":""Python"",""weight"":40,""mandatory"":true},{""name"":""statistics"",""weight"":30,""mandatory"":false},{""name"":""optimization"",""weight"":30,""mandatory"":false}]"
+p2,1,50,"[{""name"":""statistics"",""weight"":45,""mandatory"":true},{""name"":""optimization"",""weight"":35,""mandatory"":false},{""name"":""Python"",""weight"":20,""mandatory"":false}]"

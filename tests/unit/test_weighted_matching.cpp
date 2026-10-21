@@ -283,6 +283,20 @@ void testNoEligibleEdges() {
     std::cout << "Test 9 passed: No eligible edges\n";
 }
 
+void testZeroUtilityIsStillEligible() {
+    WeightedGraph graph;
+    addEdge(graph, "A1", "R1", 0);
+    const UtilityMatrix matrix = buildUtilityMatrix(graph);
+    assert(matrix.values[0][0] == 0);
+    WeightedMatchingResult result = solveMaximumWeightMatching(graph);
+    // The weighted objective permits either empty or zero-utility allocations.
+    // The solver must never treat the edge as an invalid matrix sentinel.
+    verifyMatching(graph, result);
+    assert(result.total_utility == 0);
+    assert(result.assigned_count <= 1);
+    std::cout << "Test 10 passed: Zero utility edge remains eligible\n";
+}
+
 void testInvalidUtilityRejected() {
     WeightedGraph graph;
     addEdge(graph, "A1", "R1", 101);
@@ -331,6 +345,7 @@ int main() {
     testMoreResourcesThanAgents();
     testEmptyGraph();
     testNoEligibleEdges();
+    testZeroUtilityIsStillEligible();
     testInvalidUtilityRejected();
     testDuplicateEdgeRejected();
 

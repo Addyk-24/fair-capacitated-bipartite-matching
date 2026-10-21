@@ -128,9 +128,9 @@ UtilityMatrix buildUtilityMatrix(const WeightedGraph& graph) {
     for (std::size_t e = 0; e < graph.edges.size(); ++e) {
         const WeightedEdge& edge = graph.edges[e];
 
-        if (edge.utility < 1 || edge.utility > 100) {
+        if (edge.utility < 0 || edge.utility > 100) {
             throw std::invalid_argument(
-                "Utility must be between 1 and 100."
+                "Utility must be between 0 and 100."
             );
         }
 
@@ -213,7 +213,7 @@ WeightedMatchingResult solveMaximumWeightMatching(
 
     for (int i = 0; i < A; ++i) {
         for (int j = 0; j < R; ++j) {
-            if (matrix.values[i][j] >= 1) {
+            if (matrix.values[i][j] >= 0) {
                 maximumUtility = std::max(
                     maximumUtility,
                     matrix.values[i][j]
@@ -249,7 +249,7 @@ WeightedMatchingResult solveMaximumWeightMatching(
                 utility = matrix.values[column][row];
             }
 
-            if (utility >= 1) {
+            if (utility >= 0) {
                 cost[row][column] =
                     maximumUtility - utility;
             } else {
@@ -285,7 +285,7 @@ WeightedMatchingResult solveMaximumWeightMatching(
 
         // Never return an ineligible pair, even if the solver's
         // output were unexpectedly to contain one.
-        if (utility < 1) {
+        if (utility < 0) {
             continue;
         }
 

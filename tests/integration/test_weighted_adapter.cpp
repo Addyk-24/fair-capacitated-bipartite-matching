@@ -111,20 +111,21 @@ void testEmptyAndEdgeCases() {
     CHECK_EQ(runWeighted(noEdges).total_assigned_agents, 0);
 }
 
-void testUtilityOutsideSolverRangeIsReportedNotCrashed() {
+void testZeroUtilityIsValidForWeightedSolver() {
     registerBuiltinAlgorithms();
     GeneratorConfig cfg;
     cfg.agents = 5;
     cfg.resources = 3;
     cfg.density = 1.0;
-    cfg.utility_min = 0;  // the weighted solver requires 1..100
+    cfg.utility_min = 0;
     cfg.utility_max = 0;
     Instance inst;
     CHECK_EQ(generateInstance(cfg, inst), std::string(""));
 
     const RunRecord rec = runOnce(inst, "d", "weighted", *findAlgorithm("weighted"), 1);
-    CHECK(!rec.valid);
-    CHECK(rec.validation_error.find("threw") != std::string::npos);
+    CHECK(rec.valid);
+    CHECK_EQ(rec.result.total_utility, static_cast<int64_t>(0));
+    CHECK_EQ(validateResult(inst, rec.result), std::string(""));
 }
 
 }  // namespace
@@ -134,6 +135,6 @@ int main() {
     testUsesEachResourceAtMostOnceEvenWithSpareCapacity();
     testNeverWorseThanGreedyAtUnitCapacity();
     testEmptyAndEdgeCases();
-    testUtilityOutsideSolverRangeIsReportedNotCrashed();
+    testZeroUtilityIsValidForWeightedSolver();
     return finishTests("test_weighted_adapter");
 }

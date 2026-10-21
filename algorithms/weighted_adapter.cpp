@@ -5,7 +5,7 @@
 // at most once, whatever its capacity, so the result is always feasible for the real
 // capacities but ignores spare capacity (the capacitated flow stage is what exploits
 // it). Resources with capacity 0 are removed before solving. Utilities must lie in
-// 1..100 (solver precondition); anything else makes the solver throw, which the
+// 0..100 (solver precondition); anything else makes the solver throw, which the
 // runner records as an invalid run.
 #include <cstdlib>
 #include <sstream>

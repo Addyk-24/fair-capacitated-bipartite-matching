@@ -68,6 +68,20 @@ void testEmptyMetricAndRunner() {
     CHECK_EQ(rec.result.fairness_score, 0.37);
 }
 
+void testZeroUtilityEligibleEdge() {
+    Instance in;
+    in.num_agents = 1; in.num_resources = 1; in.capacity = {1}; in.group_id = {0};
+    in.edges = {{0, 0, 0}};
+    const MatchingResult maxcard = runCapacitatedFlowMaxCardinality(in);
+    CHECK_EQ(maxcard.total_assigned_agents, 1);
+    CHECK_EQ(validateResult(in, maxcard), std::string(""));
+    const MatchingResult fair = runFairness(in);
+    CHECK_EQ(fair.total_assigned_agents, 1);
+    CHECK_EQ(fair.total_utility, static_cast<int64_t>(0));
+    CHECK_EQ(fair.fairness_score, 0.0);
+    CHECK_EQ(validateResult(in, fair), std::string(""));
+}
+
 void testUnevenAndEmptyDeclaredGroups() {
     Instance in;
     in.num_agents = 3; in.num_resources = 2; in.num_groups = 4;
@@ -85,6 +99,7 @@ int main() {
     testMaxcardThenMaxmin();
     testBruteForceSmallCases();
     testEmptyMetricAndRunner();
+    testZeroUtilityEligibleEdge();
     testUnevenAndEmptyDeclaredGroups();
     return finishTests("test_fairness");
 }

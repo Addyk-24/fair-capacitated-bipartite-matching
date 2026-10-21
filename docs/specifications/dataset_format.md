@@ -20,9 +20,10 @@ Rules:
 - Resource `v` receives **at most `c_v`** agents. Capacity 1 gives classic matching.
 - Capacity and group are stored once per resource / agent, never per edge.
 - Edges are sorted by `(agent_id, resource_id)` with no duplicate pairs.
-- Generated utilities are integers in `[utility_min, utility_max]` (default 1..100).
-  Zero is allowed; the readers do not restrict the sign of a utility, so algorithms
-  that cannot handle negative utilities must say so in their own documentation.
+- Utilities are integers in `[0, 100]`; generated utilities are in
+  `[utility_min, utility_max]` (default 1..100). Utility zero is a valid value on an
+  eligible edge; an absent edge is represented by no row in `edges.csv`. The common
+  instance validator rejects values outside this range.
 - Total utility of an allocation is the sum of `w_uv` over the assigned pairs.
 
 Isolated agents (no eligible resource) and zero-capacity resources are valid input.

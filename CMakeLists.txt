@@ -86,4 +86,10 @@ if(DAA_BUILD_TESTS)
   add_test(NAME smoke_suite
     COMMAND experiment_suite --config ${CMAKE_CURRENT_SOURCE_DIR}/experiments/configs/smoke.cfg
             --out smoke_results --overwrite)
+
+  find_package(Python3 COMPONENTS Interpreter QUIET)
+  if(Python3_Interpreter_FOUND)
+    add_test(NAME student_project_converter
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/test_student_project_converter.py)
+  endif()
 endif()

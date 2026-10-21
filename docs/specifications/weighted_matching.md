@@ -21,7 +21,7 @@ The input graph contains:
 - `resources`: unique resource identifiers.
 - `edges`: eligible agent-resource pairs with utilities.
 
-Each eligible edge must have an integer utility in the range 1 through 100.
+Each eligible edge must have an integer utility in the range 0 through 100.
 
 An agent-resource pair with no edge is ineligible. Duplicate edges for
 the same pair are rejected. Edges that refer to unknown agent or resource
@@ -60,7 +60,7 @@ maximize the number of assignments.
 `buildUtilityMatrix()` creates a matrix with agents as rows and resources
 as columns.
 
-- A value from 1 to 100 represents an eligible pair and its utility.
+- A value from 0 to 100 represents an eligible pair and its utility.
 - The value -1 represents an ineligible pair.
 - Invalid utilities, duplicate edges, and unknown identifiers cause
   `std::invalid_argument` to be thrown.
@@ -196,4 +196,7 @@ The unit tests cover:
 - Uniqueness of agents and resources in the returned matching.
 - Eligibility of every returned pair.
 
-The sample dataset is stored in `data/weighted/small_weighted.csv`.
+The value -1 remains the utility-matrix sentinel for an absent edge; zero is a valid
+utility and remains an eligible edge. The skill application derives edge utilities
+before algorithms run; see `student_project_application.md`. The sample dataset is
+stored in `data/weighted/small_weighted.csv`.

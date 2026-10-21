@@ -24,3 +24,10 @@ problem only when every resource capacity is one. Result tables suppress their r
 outside that setting. The fairness algorithm is compared on coverage and minimum
 assigned normalized utility, not against the total-utility optimizer as though the
 objectives were interchangeable.
+
+All edge utilities accepted by the common instance validator are integers in `[0,100]`.
+An existing zero-utility edge is eligible; absence is represented only by a missing edge
+(and by `-1` in the weighted solver's internal matrix). The student–project converter
+normalizes positive per-project skill weights and constructs the graph before any
+matching algorithm runs; its skill scans take `O(A·P·S)` time for `A` students, `P`
+projects, and at most `S` skills per project.
