@@ -31,6 +31,9 @@ target_link_libraries(matching_runner PRIVATE daa_core)
 add_executable(dataset_generator experiments/runners/dataset_generator.cpp)
 target_link_libraries(dataset_generator PRIVATE daa_core)
 
+add_executable(capacity_sweep experiments/runners/capacity_sweep.cpp)
+target_link_libraries(capacity_sweep PRIVATE daa_core)
+
 if(DAA_BUILD_TESTS)
   enable_testing()
 
@@ -41,6 +44,7 @@ if(DAA_BUILD_TESTS)
     tests/unit/test_validation.cpp
     tests/unit/test_instance_io.cpp
     tests/integration/test_pipeline.cpp
+    tests/integration/test_capacitated_flow.cpp
   )
   foreach(test_source IN LISTS DAA_TEST_SOURCES)
     get_filename_component(test_name ${test_source} NAME_WE)
