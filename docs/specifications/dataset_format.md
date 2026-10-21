@@ -34,7 +34,7 @@ LF or CRLF line endings, blank lines ignored):
 
 `agents.csv`
 
-```
+```text
 agent_id,group_id
 0,0
 1,0
@@ -43,7 +43,7 @@ agent_id,group_id
 
 `resources.csv`
 
-```
+```text
 resource_id,capacity
 0,1
 1,2
@@ -51,7 +51,7 @@ resource_id,capacity
 
 `edges.csv`
 
-```
+```text
 agent_id,resource_id,utility
 0,0,10
 0,1,5
@@ -101,12 +101,39 @@ To make an algorithm runnable by name:
 `matching_runner` appends one row per (dataset, algorithm, repeat) to a CSV
 (default `results/metrics/runs.csv`):
 
-```
-dataset,algorithm,repeat,agents,resources,edges,assigned_count,total_utility,fairness_score,runtime_ms,valid
+```text
+dataset,algorithm,repeat,agents,resources,edges,assigned_count,total_utility,fairness_score,runtime_ms,valid,instance_hash
 ```
 
-`fairness_score` is `NA` until a metric exists. Raw files are never edited by hand;
-plots and summaries are derived into separate files.
+- `fairness_score` is `NA` until a fairness metric is set (see hooks below).
+- `valid` is `1` only if the algorithm did not throw and every result check passed.
+- `instance_hash` is a 64-bit fingerprint of the exact `Instance` the algorithm received
+  (`include/fingerprint.hpp`). Rows of the same dataset must all carry the same hash; that is
+  the proof that every algorithm was compared on identical input.
+- Raw files are never edited by hand; plots and summaries are derived into separate files.
+
+## 4a. Runner hooks (`include/experiment.hpp`)
+
+| Hook | Purpose |
+| :--- | :--- |
+| `addResultCheck(name, fn)` | extra rule run on every result after the built-in `validateResult`; return `""` if fine, else a message. A failure marks the run invalid as `"<name>: <message>"`. For stage-specific rules, e.g. a fairness constraint. |
+| `setFairnessMetric(fn)` | computes `fairness_score` for every valid run (unless the algorithm already set it). The metric is chosen by the fairness stage; until then the column stays `NA`. |
+
+An algorithm that throws is caught and logged as an invalid run instead of aborting the experiment.
+
+## 4b. Capacity semantics per stage
+
+| Stage | Uses resource capacity `c_j` |
+| :--- | :--- |
+| `greedy_reference` | fully (up to `c_j` agents per resource) |
+| `weighted` (Hungarian, capacity-1) | at most **one** agent per resource, whatever `c_j` is; resources with `c_j = 0` are never used |
+| capacitated flow | fully (min-cost max-flow) |
+| fairness-aware | per its own formulation |
+
+Consequence for experiments: do not compare `weighted` against capacity-aware stages on
+instances where capacity exceeds 1 and read the gap as an algorithm difference. With
+`capacity_mode = fixed` and `capacity = 1` all stages face the same problem and are
+directly comparable. In other regimes the gap measures the value of spare capacity.
 
 ## 5. Synthetic generator
 
@@ -126,3 +153,44 @@ implemented in `include/rng.hpp`, not `<random>`).
 
 Draw order is groups, then capacities, then edges (agent-major), so a parameter change
 only affects the parts that depend on it.
+
+## 6. Experiment suite (`experiment_suite`)
+
+Runs a whole experiment from one config file: dataset sweep x algorithms x repeats.
+
+```text
+experiment_suite --config experiments/configs/smoke.cfg [--out DIR] [--name N] [--overwrite] [--dry-run] [--list]
+```
+
+Config format: `key = value` lines, `#` comments, **every parameter may be a comma-separated list**
+and the suite runs the full cross product (`agents = 100,500` and `seed = 1,2,3` give 6 datasets).
+
+| Key | Meaning (default) |
+| :--- | :--- |
+| `name` | experiment name, results folder (`experiment`) |
+| `algos` | comma-separated names, or `all` (`all`) |
+| `repeats` | runs per algorithm per dataset, one raw row each (`1`) |
+| `agents`, `resources`, `density`, `popularity_skew`, `utility_dist`, `capacity_mode`, `groups`, `group_skew` | generator parameters, as in section 5 |
+| `capacity` | values for `capacity_mode = fixed` only |
+| `utility_min`, `utility_max` | utility range (not swept) |
+| `seed` | list of seeds; each seed is a separate dataset |
+| `out_dir`, `dataset_dir`, `save_datasets`, `overwrite` | output locations; `save_datasets = true` also writes each dataset in the section 2 format |
+
+Unknown keys, duplicate keys, bad values and duplicate datasets in a sweep are errors, and every
+generator config is validated before anything runs.
+
+Output layout, grouped by input size and then by parameter setting:
+
+```text
+<out_dir>/<name>/config_used.cfg                       copy of the config that produced the results
+<out_dir>/<name>/n<agents>_m<resources>/<tag>/runs.csv raw rows (section 4)
+<out_dir>/<name>/n<agents>_m<resources>/<tag>/params.txt   generator parameters, seed, instance_hash, algorithms
+```
+
+`<tag>` encodes the remaining parameters, e.g. `d0.15_ps1_ubell_clow_g3_gs1_seed1`
+(density, popularity skew, utility distribution, capacity, groups, group skew, seed).
+
+All algorithms and repeats of a dataset receive the same `const Instance`. Existing `runs.csv`
+files are never replaced silently; pass `--overwrite` (or `overwrite = true`) to allow it.
+
+Shipped configs: `smoke.cfg` (runs under `ctest` as `smoke_suite`) and `week3_scaling.cfg`.
