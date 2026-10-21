@@ -1,0 +1,46 @@
+{
+  "description": "Deterministic synthetic student-project study using weighted named skills and the existing converter.",
+  "seeds": [17, 29, 43],
+  "repeats": 3,
+  "algorithms": "all",
+  "common": {
+    "agents": 500,
+    "projects": 50,
+    "capacity_ratio": 1.0,
+    "minimum_coverage": 35,
+    "groups": 3,
+    "group_skew": 0.5,
+    "cross_track_probability": 0.2,
+    "student_skill_min": 5,
+    "student_skill_max": 14,
+    "project_skill_min": 5,
+    "project_skill_max": 7,
+    "mandatory_min": 1,
+    "mandatory_max": 3
+  },
+  "experiments": [
+    {
+      "name": "skill_scaling_agents",
+      "sweep": {"agents": [100, 250, 500, 1000]}
+    },
+    {
+      "name": "skill_scaling_projects",
+      "sweep": {"projects": [10, 25, 50, 100]}
+    },
+    {
+      "name": "skill_capacity",
+      "sweep": {"capacity_ratio": [0.5, 0.75, 1.0, 1.25, 1.5]}
+    },
+    {
+      "name": "skill_minimum_coverage",
+      "sweep": {"minimum_coverage": [20, 35, 50, 65]}
+    },
+    {
+      "name": "skill_specialization",
+      "sweep": {
+        "group_skew": [0.0, 0.8],
+        "cross_track_probability": [0.08, 0.2, 0.35]
+      }
+    }
+  ]
+}

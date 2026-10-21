@@ -12,6 +12,8 @@ student–project converter. The recorded algorithm findings remain observations
 those synthetic inputs, but they do not test the weighted-skill model or support
 student–project conclusions. No rerun or new benchmark result is claimed here.
 Application-specific conclusions require a separate run using the current converter.
+The weighted-skill experiment design and its separate output paths are documented in
+`docs/skill_based_experiment_design.md`; its results are not part of this Week 4 matrix.
 
 Derived tables are in `results/tables/`; plots are in `results/figures/`. Exact per-run
 measurements are in `results/metrics/`. The configs, algorithms, seed values, and

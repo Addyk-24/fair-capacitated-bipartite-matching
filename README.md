@@ -140,6 +140,13 @@ received the identical instance, and that results are stable across repeats. The
 interpretation of the current results is in
 [docs/results_interpretation.md](docs/results_interpretation.md).
 
+The separate weighted-skill study varies student/project scale, capacity, minimum
+coverage, skill overlap, and group composition. Its workload assumptions, objective-aware
+baselines, isolated outputs, and exact PowerShell commands are documented in
+[docs/skill_based_experiment_design.md](docs/skill_based_experiment_design.md). It writes
+to `results/metrics/skill_based/<run-id>/` and separately namespaced table and figure
+folders. No skill-based experimental results are claimed until this pipeline is run.
+
 ---
 
 ## 6. Student–project example

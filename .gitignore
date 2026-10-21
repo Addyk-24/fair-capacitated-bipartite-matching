@@ -54,6 +54,8 @@ data/processed/*
 data/synthetic/*
 !data/synthetic/.gitkeep
 !data/synthetic/sample_*/
+data/skill_based/*
+!data/skill_based/.gitkeep
 results/metrics/*
 !results/metrics/.gitkeep
 results/plots/*
