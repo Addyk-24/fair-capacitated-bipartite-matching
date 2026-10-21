@@ -11,8 +11,20 @@
 //   cardinality      - Om     (Week 1-2)
 //   weighted         - Kartik (Week 2)
 //   capacitated_flow - Yash   (Week 2)
-//   fairness         - Week 3
+//   fairness         - max-cardinality then max-min utility
 namespace daa {
+
+// Maximum-cardinality bipartite matching using augmenting paths. This baseline
+// treats every resource as capacity one (capacity zero means unavailable).
+// Time O(A * E), space O(A + R + E).
+MatchingResult runCardinality(const Instance& inst);
+
+// Maximum-cardinality allocation, then maximum minimum assigned utility. Among
+// allocations tied on those objectives, maximize total utility.
+MatchingResult runFairness(const Instance& inst);
+
+// Minimum assigned utility normalized to [0,1]; empty allocations score zero.
+double minimumNormalizedUtility(const Instance& inst, const MatchingResult& result);
 
 // Reference heuristic: take edges by decreasing utility, assign when the agent is
 // still free and the resource has capacity left. Deterministic but NOT optimal.
@@ -32,7 +44,8 @@ MatchingResult runWeighted(const Instance& inst);
 // resources accept up to capacity[v] agents; agents may stay unassigned).
 // runCapacitatedFlowMaxCardinality is classic min-cost MAX-flow: it assigns the maximum
 // possible number of agents first, then maximizes utility among those allocations.
-// Time O(F * V * E) worst case (F = flow value, V = A + R + 2, E = edges + A + R),
+// Successive shortest paths with potentials: O(V*E + F*E*log V) time,
+// V = A + R + 2, E = edges + A + R,
 // space O(V + E).
 MatchingResult runCapacitatedFlow(const Instance& inst);
 MatchingResult runCapacitatedFlowMaxCardinality(const Instance& inst);

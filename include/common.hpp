@@ -33,7 +33,7 @@ struct MatchingResult {
     std::string algorithm_name;
     int32_t total_assigned_agents = 0;
     int64_t total_utility = 0;
-    double fairness_score = -1.0;  // < 0 means "not computed" (Week 3 fills this in)
+    double fairness_score = -1.0;  // minimum assigned utility / 100; < 0 means unavailable
     double runtime_milliseconds = 0.0;
     std::vector<std::pair<int32_t, int32_t>> assignments;  // (agent_id, resource_id)
 };

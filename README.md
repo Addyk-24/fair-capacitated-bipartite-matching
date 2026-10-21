@@ -18,7 +18,7 @@ $$\text{Agents } (U) \longrightarrow \text{Utility } (w_{ij}) \longrightarrow \t
 1. **Maximum-Cardinality Baseline:** Baseline feasibility matching enforcing the one-assignment-per-agent constraint.
 2. **Maximum-Weight Matching:** Preference- and utility-aware assignment maximizing total allocation weight.
 3. **Capacity-Constrained Matching:** Network flow formulation (Min-Cost Max-Flow) handling multi-capacity resources ($c_j \ge 1$).
-4. **Fairness-Aware Optimization:** Constrained or multi-objective optimization balancing efficiency against group or individual fairness metrics.
+4. **Fairness-Aware Optimization:** Maximum cardinality, then maximum minimum assigned utility, with total utility as a tie-break.
 5. **Empirical Benchmarks:** Scalability profiles, theoretical complexity verification, runtime trade-offs, and allocation distributions.
 
 ---
@@ -50,7 +50,9 @@ notebooks/       plotting and analysis (Python, optional)
 ```
 
 The input/output contract every algorithm must follow is in
-[docs/specifications/dataset_format.md](docs/specifications/dataset_format.md).
+[docs/specifications/dataset_format.md](docs/specifications/dataset_format.md). The student–project
+application and named-skill conversion are specified in
+[docs/specifications/student_project_application.md](docs/specifications/student_project_application.md).
 
 ---
 
@@ -125,7 +127,7 @@ Existing results are never overwritten unless you pass `--overwrite`.
 ### Reproduce the Week 4 results
 
 ```bash
-python experiments/run_week4.py --suite build/experiment_suite   # runs experiments/configs/week4_*.cfg
+python experiments/run_week4.py --suite build/experiment_suite.exe --overwrite
 ```
 
 This runs the five Week 4 experiments (scaling in agents and resources, capacity regimes,
@@ -139,18 +141,34 @@ interpretation of the current results is in
 
 ---
 
-## 6. Status
+## 6. Student–project example
+
+The checked-in source dataset is in `data/student_projects/example`. Convert its
+named-skill student and project records to the common format and run all algorithms:
+
+```bash
+python applications/convert_student_projects.py data/student_projects/example data/synthetic/student_project_example
+./build/matching_runner --input data/synthetic/student_project_example --algo all --output results/metrics/student_project_example.csv
+```
+
+Eligibility, the integer 1–100 utility formula, capacities and group mapping are
+documented in [the application specification](docs/specifications/student_project_application.md).
+
+## 7. Algorithm objectives and status
+
+Complexity and comparison semantics are summarized in
+[docs/algorithm_complexity.md](docs/algorithm_complexity.md).
 
 | Stage | Owner | State |
 | :--- | :--- | :--- |
 | Repository, dataset format, generator, runner, validators | Aditya | done |
 | Experiment suite (config sweeps, seeds, result layout, hooks) | Aditya | Week 3 done |
-| Master experiment matrix, analysis scripts, tables, plots, interpretation | Aditya | Week 4 done for the merged stages; rerun when cardinality and fairness land |
+| Master experiment matrix, analysis scripts, tables, plots, interpretation | Aditya | Week 4 matrix rerun after integration |
 | `greedy_reference` (non-optimal sanity baseline, not a project stage) | Aditya | done |
-| Maximum cardinality (`cardinality`) | Om | problem definition on `main`; algorithm not yet merged |
+| Maximum cardinality (`cardinality`) | Om | implemented; capacity-one augmenting paths |
 | Maximum weight (`weighted`) | Kartik | merged; runnable through an adapter (capacity-1 stage) |
 | Capacity-constrained min-cost flow (`capacitated_flow`, `capacitated_flow_maxcard`) | Yash | merged |
-| Fairness-aware stage and metric | Nikhil / team | not yet merged (runner hook ready) |
+| Fairness-aware stage and metric | Nikhil / team | max-cardinality then max-min utility implemented |
 
 Contribution rules (branches, commits, pull requests, reviews, code constraints) are in
 [CONTRIBUTING.md](CONTRIBUTING.md).

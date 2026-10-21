@@ -104,7 +104,7 @@ void testResultChecks() {
 void testFairnessMetricSlot() {
     const Instance inst = sample();
     setFairnessMetric(nullptr);
-    CHECK(runOnce(inst, "d", "one", onePair, 1).result.fairness_score < 0.0);  // NA by default
+    CHECK_EQ(runOnce(inst, "d", "one", onePair, 1).result.fairness_score, 0.10);  // built-in minimum utility
 
     // Stand-in metric, only to prove the plumbing; the real one comes from the fairness stage.
     setFairnessMetric([](const Instance&, const MatchingResult& r) {

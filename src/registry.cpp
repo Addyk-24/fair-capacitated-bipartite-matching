@@ -33,12 +33,12 @@ std::vector<std::string> algorithmNames() {
 }
 
 void registerBuiltinAlgorithms() {
+    registerAlgorithm("cardinality", runCardinality);
+    registerAlgorithm("fairness", runFairness);
     registerAlgorithm("greedy_reference", runGreedyReference);
     registerAlgorithm("weighted", runWeighted);
     registerAlgorithm("capacitated_flow", runCapacitatedFlow);
     registerAlgorithm("capacitated_flow_maxcard", runCapacitatedFlowMaxCardinality);
-    // One line per stage as it lands, e.g.:
-    //   registerAlgorithm("cardinality", runCardinality);
 }
 
 }  // namespace daa

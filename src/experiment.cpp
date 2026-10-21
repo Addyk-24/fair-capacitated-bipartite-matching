@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "fingerprint.hpp"
+#include "algorithms.hpp"
 #include "instance_io.hpp"
 #include "timer.hpp"
 #include "validation.hpp"
@@ -96,8 +97,9 @@ RunRecord runOnce(const Instance& inst, const std::string& dataset_name,
     }
     rec.valid = rec.validation_error.empty();
 
-    if (rec.valid && fairnessMetric() && rec.result.fairness_score < 0.0) {
-        rec.result.fairness_score = fairnessMetric()(inst, rec.result);
+    if (rec.valid && rec.result.fairness_score < 0.0) {
+        rec.result.fairness_score = fairnessMetric() ? fairnessMetric()(inst, rec.result)
+                                                     : minimumNormalizedUtility(inst, rec.result);
     }
     return rec;
 }

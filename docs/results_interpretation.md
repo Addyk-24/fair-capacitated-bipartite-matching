@@ -1,155 +1,116 @@
-# Experimental Results: Interpretation (preliminary)
+# Week 4 experimental results
 
-**Status of this document.** Written from one full run of the Week 4 matrix on 2026-10-21.
-It covers the four stages that are merged on `main`: `greedy_reference`, `weighted`,
-`capacitated_flow` and `capacitated_flow_maxcard`. Two things are **not** in it yet:
+**Run status:** completed on 2026-10-21 with the integrated `cardinality` and
+`fairness` stages. The five checked-in Week 4 configs produced 4,428 raw rows across
+222 datasets and six algorithms. The experiment runner reported 0 invalid runs; the
+analysis integrity check reported all rows valid, identical instance hashes across
+algorithms on each dataset, and stable allocation outcomes across repeats.
 
-- the **cardinality** stage (not merged),
-- any **fairness** result (no fairness metric is wired in, so `fairness_score` is `NA` and the
-  fairness-vs-utility plot is not produced).
+Derived tables are in `results/tables/`; plots are in `results/figures/`. Exact per-run
+measurements are in `results/metrics/`. The configs, algorithms, seed values, and
+analysis script are the source of record; runtime values depend on the machine and
+system load.
 
-Rerun `experiments/run_week4.py` once those land and update the numbers and the last section.
-Runtimes below are from one laptop (Windows, MinGW GCC 6.3, `-O3`); the *shape* of the curves
-matters, not the absolute milliseconds. Utility, assigned counts and ratios do not depend on the
-machine.
+## Objectives and fair comparisons
 
-## 1. What was run
+The stages solve different problems, and the analysis leaves objective-incompatible
+ratio cells blank:
 
-Five experiments, 2,952 raw rows, 222 datasets x 4 algorithms, every run validated
-(eligible edges only, one assignment per agent, capacities respected, totals consistent).
+- `capacitated_flow` maximizes total utility using full resource capacities.
+- `capacitated_flow_maxcard` maximizes assignment count, then total utility, using
+  full capacities.
+- `fairness` maximizes assignment count, then the minimum utility among assigned
+  agents, then total utility. It matched the max-cardinality count on all 222 datasets.
+- `weighted` and `cardinality` treat resources as capacity one. They are directly
+  comparable to capacity-aware stages only when all capacities equal one.
+- `greedy_reference` is a heuristic with full capacity support; its utility and
+  coverage ratios are reported against their corresponding capacity-aware optima.
 
-| Experiment | Varies | Fixed |
-| :--- | :--- | :--- |
-| `week4_scaling` | agents 100 to 4000 | 25 resources, density 0.1, balanced capacity |
-| `week4_scaling_resources` | resources 10 to 400 | 1000 agents, density 0.1, balanced capacity |
-| `week4_capacity` | capacity regime (fixed 1, 2, 4; low, balanced, high) | 500 agents, 25 resources, density 0.2 |
-| `week4_utility_density` | utility distribution x density 0.05 to 0.6 | 500 agents, 25 resources, balanced capacity |
-| `week4_groups` | group count, group-size skew, popularity skew, capacity | 500 agents, 25 resources (for the fairness stage) |
+The fairness score is the minimum assigned utility divided by 100. Its mean was **0.263**
+across the matrix, compared with **0.233** for `capacitated_flow_maxcard`. The fairness
+allocation's mean total utility was 98.5% of the maximum-total-utility allocation when
+shown as a descriptive trade-off; its lowest per-dataset ratio was 87.7%. These utility
+ratios describe the efficiency cost of the fairness objective and are not presented as
+an optimization guarantee or a same-objective comparison.
 
-Data checks done by `notebooks/analyze_results.py` before any number is used: all rows valid;
-within each dataset every algorithm received the identical instance (same `instance_hash`);
-every algorithm gave identical results on all repeats (they are deterministic).
+## Findings
 
-Reference for the ratios: **utility** is divided by `capacitated_flow` (the best total utility
-achievable under the real capacities); **assigned count** is divided by
-`capacitated_flow_maxcard` (the largest possible number of assigned agents).
+### Capacity-one instances
 
-## 2. Findings
+There were five capacity-one datasets in the capacity experiment. `weighted`,
+`capacitated_flow`, `capacitated_flow_maxcard`, `fairness`, and `greedy_reference` all
+matched the same total utility on each. This cross-check compares the exact methods on
+the same feasible set; it also shows that the fairness tie-break preserves the utility
+optimum on these cases.
 
-### 2.1 The stages only agree where they solve the same problem (capacity 1)
+### Capacity and coverage
 
-At capacity 1 (`fixed1`, 5 datasets) `weighted`, `capacitated_flow` and
-`capacitated_flow_maxcard` return the **same total utility on every dataset**. Two independently
-written exact algorithms (Hungarian vs min-cost flow) agreeing exactly is the strongest
-correctness evidence in the project. (`greedy_reference` also equals the optimum there, which
-is plausible with 500 agents competing for 25 resources: few agents are the best choice for two
-resources at once.)
+Across the full matrix, `capacitated_flow` assigned an average of **439.5** agents per
+dataset; `capacitated_flow_maxcard` and `fairness` each assigned **455.6**. The utility
+optimizer can leave lower-value assignments unused when that produces a higher total
+utility. The max-cardinality and fairness stages instead preserve the greatest feasible
+coverage.
 
-### 2.2 `weighted` is a capacity-1 stage, and the numbers show what that costs
+In the capacity experiment, the capacity-aware utility solver averaged 486.2 assigned
+agents and utility 30,059.4 under balanced capacity. The max-cardinality solver assigned
+all 500, with average utility 29,777.6. The fairness solver also assigned all 500 and
+averaged utility 29,631.8. At high capacity, utility and maximum-cardinality allocations
+nearly coincide (utilities 32,807.2 and 32,802.4 respectively).
 
-`weighted` assigns at most one agent per resource, so with 25 resources it assigned exactly 25
-agents in every regime. Its utility relative to the optimum falls as capacity grows:
+The capacity-one `weighted` stage assigned 25 agents in all capacity regimes because it
+uses at most one seat per each of the 25 resources. Its utility ratio is reported only
+for capacity-one cases. The `cardinality` stage likewise has a meaningful count ratio
+only when the actual capacities are all one.
 
-| Capacity | weighted utility / optimum |
-| :--- | :--- |
-| fixed 1 | 1.000 |
-| fixed 2 | 0.513 |
-| fixed 4 | 0.267 |
-| low (about 0.5 x agents in total) | 0.118 |
-| balanced | 0.072 |
-| high | 0.066 |
+### Density and eligibility
 
-This is the expected `~1/c` behaviour, not a defect in the Hungarian implementation: the
-problem it is asked to solve is smaller. It means `weighted` must only be compared with
-capacity-aware stages at capacity 1; elsewhere the gap measures the value of spare capacity.
-The overall "mean utility ratio 0.134" for `weighted` in the summary table mixes regimes and
-should not be quoted on its own.
+With 500 agents and balanced capacity, the utility-maximizing flow stage assigned an
+average of 288.3 agents at density 0.05, 393.9 at 0.1, 491.8 at 0.3, and 499.6 at 0.6.
+Sparse eligibility, rather than total nominal capacity alone, limits achievable
+coverage at low density.
 
-### 2.3 Coverage versus utility inside the capacity-aware stages
+### Heuristic and runtime
 
-The two flow variants optimise different objectives:
+Across datasets where comparison is meaningful, `greedy_reference` averaged 0.949 of
+the capacity-aware maximum utility and 0.914 of maximum coverage. Its median runtime was
+0.235 ms. The capacity-aware utility and max-cardinality flow stages had median runtimes
+of 32.610 ms and 33.611 ms. The fairness stage was slower: median **262.034 ms**, with a
+maximum observed runtime of **17,862.877 ms**. Its threshold search repeatedly solves
+flow instances, so this cost is expected to exceed a single flow optimization.
 
-- `capacitated_flow` maximises utility and may leave agents unassigned.
-- `capacitated_flow_maxcard` assigns as many agents as possible first, then maximises utility.
+Log-log fits over the six tested sizes gave the following agent-scaling exponents:
 
-Under **balanced** capacity (total capacity equal to the number of agents), on average
-`capacitated_flow` assigns 486 of 500 agents and reaches utility 30,059, while
-`capacitated_flow_maxcard` assigns all 500 and reaches 29,778 (**0.9% less utility** for 14
-more agents placed). Across all datasets `capacitated_flow` left some agents unassigned in 155 of
-222, with as little as 88.8% of the achievable count placed; the most utility the full-coverage
-variant gave up was **12.3%** (1000 agents, 50 resources, balanced, uniform utilities). When
-capacity is ample (`high`) the two nearly coincide (500 vs 499.4 agents, utility ratio 1.000).
+| Algorithm | Empirical exponent | R² |
+| --- | ---: | ---: |
+| `greedy_reference` | 1.126 | 0.997 |
+| `cardinality` | 0.974 | 0.989 |
+| `weighted` | 1.622 | 0.976 |
+| `capacitated_flow` | 1.904 | 0.995 |
+| `capacitated_flow_maxcard` | 1.951 | 0.997 |
+| `fairness` | 1.930 | 0.999 |
 
-Why it matters for fairness: leaving the lowest-value agents out is the efficient choice, so
-the efficiency-maximising allocation systematically drops whoever has low utility
-for the scarce resources. How that is distributed over groups is exactly what the fairness stage
-has to measure; the `week4_groups` experiment generates the datasets for it, but no group-level
-conclusion can be drawn until a fairness metric is wired in.
+These are measured trends for this generated workload, not proofs of worst-case
+complexity. See [algorithm_complexity.md](algorithm_complexity.md) for theoretical
+bounds. Timings are especially sensitive to graph density, capacities, and machine load.
 
-### 2.4 The greedy reference is fast but loses utility when capacity is tight
+## Group sweep limitation
 
-`greedy_reference` runs in under 5 ms on every dataset but reaches only 0.949 of the optimum on
-average (worst case 0.876) and assigns 91.4% of the achievable count. It matches the optimum on
-only 7 of 222 datasets. Its loss is largest at balanced capacity (mean ratio 0.934) and vanishes
-at capacity 1 and 2 (1.000, 0.999). It is useful as a lower bound, not as a stage.
+`week4_groups` varies the number of labels and group-size skew, but the approved
+fairness objective is individual max-min utility and does not use `group_id`. Its score
+therefore measures the worst assigned individual utility, not demographic or group
+parity. The experiment does not establish group-fairness guarantees. A group-parity
+claim would require a separately approved metric and optimization objective.
 
-### 2.5 Runtime growth
+## Reproduction
 
-Empirical growth exponents from a log-log fit of mean runtime (6 sizes, R-squared at least 0.99):
+From the repository root on Windows PowerShell:
 
-| Algorithm | exponent in agents | exponent in resources |
-| :--- | :--- | :--- |
-| greedy_reference | 1.15 | 1.00 |
-| weighted | 1.30 | 0.92 |
-| capacitated_flow | 1.99 | 0.98 |
-| capacitated_flow_maxcard | 1.97 | 0.92 |
-
-- `capacitated_flow` grows roughly **quadratically in agents** (0.38 ms at 100 agents, 626 ms at
-  4000). The documented worst case is O(F x V x E) with F, V and E all growing with the number of
-  agents; the measured quadratic growth is consistent with F x E (flow value times edges) because
-  the shortest-path searches rarely touch the whole graph.
-- `weighted` grows far more slowly than its documented O(k^2 l) bound would allow: going from 10
-  to 400 resources (40x) took 4.4 ms to 128 ms (29x), where a quadratic-in-k term would predict
-  1,600x. These instances are random and sparse, so the bound is not reached; this says nothing
-  about worst-case inputs. The weighted time also includes converting the instance to the
-  solver's own graph format (the adapter), and its matrix construction is O(E(A+R)).
-- These are **measured trends on random instances over the sizes tested**, not a verification of
-  the worst-case bounds. The bounds themselves are argued in the algorithm documents.
-
-### 2.6 Effect of utility distribution and density
-
-Density decides how many agents can be placed at all under balanced capacity. The optimal
-utility stage (`capacitated_flow`) assigned on average 288 of 500 agents at density 0.05, 394 at
-0.1, 492 at 0.3 and 500 (499.6) at 0.6, so at low density many agents simply have no
-eligible resource with room.
-
-`greedy_reference` stays below the optimum at every density and distribution tested, by between
-2.4% (low-utility distribution, density 0.05) and 11.6% (high-utility distribution, density 0.1).
-The gap is smallest for the `low` distribution (0.94 to 0.98 of optimum) and largest for `high`
-and `uniform` at mid densities (0.88 to 0.92). The full tables are
-`results/tables/utility_density_effect.md` and `results/tables/per_dataset.csv`.
-
-## 3. Anomalies and limits
-
-- **Greedy equals optimum at capacity 1.** Not an anomaly (see 2.1), but it means capacity-1 data
-  cannot discriminate between greedy and the exact stages at these agent-to-resource ratios.
-- **Capacity regimes `low`/`balanced`/`high` are defined from the agent count.** Total capacity is
-  about 0.5x / 1x / 2x the number of agents, so `balanced` is close to the point where full
-  coverage first becomes possible; that is why the coverage-versus-utility gap peaks there.
-- **Seeds.** 3 to 5 seeds per setting; the plots show the spread of runtime over seeds but
-  utility ratios are averaged without confidence intervals. More seeds would be needed before
-  claiming differences smaller than about 1%.
-- **Machine dependence.** Timing was taken on one Windows laptop with a laptop's normal
-  background load; repeat on a quiet machine before quoting absolute times in the report.
-- **Not yet covered:** cardinality stage; fairness score and the fairness-vs-utility trade-off.
-
-## 4. Reproducing everything
-
-```bash
-cmake -B build -S . -DCMAKE_BUILD_TYPE=Release && cmake --build build
-python experiments/run_week4.py --suite build/experiment_suite      # use --overwrite to rerun
+```powershell
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release --parallel 4
+python experiments/run_week4.py --suite build/experiment_suite.exe --overwrite
 ```
 
-Raw rows: `results/metrics/<experiment>/...` (never edited). Derived: `results/tables/` and
-`results/figures/`. Files shipped in this repository: the five `experiments/configs/week4_*.cfg`,
-`experiments/run_week4.py` and `notebooks/analyze_results.py`.
+The script runs every `experiments/configs/week4_*.cfg`, then rebuilds the tables and
+figures with `notebooks/analyze_results.py`. Use `--overwrite` to replace existing raw
+experiment CSVs.

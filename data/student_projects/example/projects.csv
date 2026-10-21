@@ -1,0 +1,4 @@
+project_id,capacity,required_skills,preferred_skills
+p0,1,"C++,algorithms","graph theory"
+p1,2,"Python","statistics,optimization"
+p2,1,"statistics,optimization","Python"

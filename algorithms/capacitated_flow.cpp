@@ -34,6 +34,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <functional>
 #include <queue>
 #include <utility>
 #include <vector>
@@ -67,44 +68,64 @@ public:
 
     int32_t flowOn(size_t forwardArc) const { return arcs_[forwardArc ^ 1].cap; }
 
-    // Successive shortest paths. Every augmentation pushes exactly one unit because the
-    // source arcs have capacity 1. If stopWhenNotImproving, stops once the cheapest path
-    // has cost >= 0 (minimum-cost flow of any value); otherwise runs to maximum flow.
+    // Successive shortest paths with vertex potentials. One SPFA pass initializes
+    // shortest-path potentials for the negative utility costs; each later search uses
+    // Dijkstra on nonnegative reduced costs. Every augmentation pushes one unit because
+    // source arcs have capacity 1.
     void run(size_t source, size_t sink, bool stopWhenNotImproving) {
         const int64_t INF = std::numeric_limits<int64_t>::max() / 4;
         const size_t n = adj_.size();
-        std::vector<int64_t> dist(n);
+        std::vector<int64_t> potential(n, INF);
         std::vector<char> inQueue(n);
+        std::queue<size_t> initial;
+        potential[source] = 0;
+        initial.push(source);
+        inQueue[source] = 1;
+        while (!initial.empty()) {
+            const size_t u = initial.front();
+            initial.pop();
+            inQueue[u] = 0;
+            for (size_t k = 0; k < adj_[u].size(); ++k) {
+                const Arc& a = arcs_[adj_[u][k]];
+                if (a.cap > 0 && potential[u] + a.cost < potential[a.to]) {
+                    potential[a.to] = potential[u] + a.cost;
+                    if (!inQueue[a.to]) { inQueue[a.to] = 1; initial.push(a.to); }
+                }
+            }
+        }
+        for (size_t v = 0; v < n; ++v) if (potential[v] == INF) potential[v] = 0;
+
+        std::vector<int64_t> dist(n);
         std::vector<size_t> viaArc(n);
         const size_t NONE = std::numeric_limits<size_t>::max();
 
         while (true) {
             dist.assign(n, INF);
-            inQueue.assign(n, 0);
             viaArc.assign(n, NONE);
-            std::queue<size_t> q;
             dist[source] = 0;
-            q.push(source);
-            inQueue[source] = 1;
+            typedef std::pair<int64_t, size_t> QueueEntry;
+            std::priority_queue<QueueEntry, std::vector<QueueEntry>, std::greater<QueueEntry> > q;
+            q.push(QueueEntry(0, source));
             while (!q.empty()) {
-                const size_t u = q.front();
+                const QueueEntry current = q.top();
                 q.pop();
-                inQueue[u] = 0;
+                const size_t u = current.second;
+                if (current.first != dist[u]) continue;
                 for (size_t k = 0; k < adj_[u].size(); ++k) {
                     const size_t id = adj_[u][k];
                     const Arc& a = arcs_[id];
-                    if (a.cap > 0 && dist[u] + a.cost < dist[a.to]) {
-                        dist[a.to] = dist[u] + a.cost;
+                    const int64_t reduced = a.cost + potential[u] - potential[a.to];
+                    if (a.cap > 0 && dist[u] + reduced < dist[a.to]) {
+                        dist[a.to] = dist[u] + reduced;
                         viaArc[a.to] = id;
-                        if (!inQueue[a.to]) {
-                            inQueue[a.to] = 1;
-                            q.push(a.to);
-                        }
+                        q.push(QueueEntry(dist[a.to], a.to));
                     }
                 }
             }
             if (dist[sink] >= INF) break;                         // no augmenting path left
-            if (stopWhenNotImproving && dist[sink] >= 0) break;   // extra flow would not help
+            const int64_t pathCost = dist[sink] + potential[sink] - potential[source];
+            if (stopWhenNotImproving && pathCost >= 0) break;     // extra flow would not help
+            for (size_t v = 0; v < n; ++v) if (dist[v] < INF) potential[v] += dist[v];
 
             size_t v = sink;
             while (v != source) {

@@ -83,7 +83,7 @@ Return a `MatchingResult` with:
 | `total_utility` | must equal the sum of the assigned edges' utilities |
 | `algorithm_name` | set by the runner from the registered name |
 | `runtime_milliseconds` | **set by the runner**; algorithms do not time themselves |
-| `fairness_score` | `-1` until a fairness metric is wired in (Week 3) |
+| `fairness_score` | Minimum utility among assigned agents divided by 100; 0 for an empty assignment |
 
 The runner calls `validateResult` after every run (eligible edges only, agent used at
 most once, capacities respected, totals consistent) and records a `valid` flag.
@@ -105,7 +105,7 @@ To make an algorithm runnable by name:
 dataset,algorithm,repeat,agents,resources,edges,assigned_count,total_utility,fairness_score,runtime_ms,valid,instance_hash
 ```
 
-- `fairness_score` is `NA` until a fairness metric is set (see hooks below).
+- `fairness_score` is the minimum assigned utility divided by 100 (or 0 for no assignments).
 - `valid` is `1` only if the algorithm did not throw and every result check passed.
 - `instance_hash` is a 64-bit fingerprint of the exact `Instance` the algorithm received
   (`include/fingerprint.hpp`). Rows of the same dataset must all carry the same hash; that is
@@ -117,7 +117,7 @@ dataset,algorithm,repeat,agents,resources,edges,assigned_count,total_utility,fai
 | Hook | Purpose |
 | :--- | :--- |
 | `addResultCheck(name, fn)` | extra rule run on every result after the built-in `validateResult`; return `""` if fine, else a message. A failure marks the run invalid as `"<name>: <message>"`. For stage-specific rules, e.g. a fairness constraint. |
-| `setFairnessMetric(fn)` | computes `fairness_score` for every valid run (unless the algorithm already set it). The metric is chosen by the fairness stage; until then the column stays `NA`. |
+| `setFairnessMetric(fn)` | optionally overrides the default minimum-normalized-utility score for every valid run (unless the algorithm already set it). |
 
 An algorithm that throws is caught and logged as an invalid run instead of aborting the experiment.
 
@@ -128,7 +128,7 @@ An algorithm that throws is caught and logged as an invalid run instead of abort
 | `greedy_reference` | fully (up to `c_j` agents per resource) |
 | `weighted` (Hungarian, capacity-1) | at most **one** agent per resource, whatever `c_j` is; resources with `c_j = 0` are never used |
 | capacitated flow | fully (min-cost max-flow) |
-| fairness-aware | per its own formulation |
+| `fairness` | fully; maximum cardinality, then maximum minimum utility |
 
 Consequence for experiments: do not compare `weighted` against capacity-aware stages on
 instances where capacity exceeds 1 and read the gap as an algorithm difference. With

@@ -1,0 +1,5 @@
+student_id,group,skills,preferred_skills
+s0,first_generation,"C++,algorithms","graph theory,optimization"
+s1,continuing,"Python,statistics","algorithms,optimization"
+s2,first_generation,"C++,Python","graph theory"
+s3,continuing,"statistics,optimization","Python"

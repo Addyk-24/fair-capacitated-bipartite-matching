@@ -50,6 +50,8 @@ if(DAA_BUILD_TESTS)
     tests/unit/test_instance_io.cpp
     tests/unit/test_hooks.cpp
     tests/unit/test_weighted_matching.cpp
+    tests/unit/test_cardinality.cpp
+    tests/unit/test_fairness.cpp
     tests/integration/test_pipeline.cpp
     tests/integration/test_capacitated_flow.cpp
 

@@ -146,15 +146,26 @@ def per_dataset_table(runs):
         repeats=("repeat", "count"),
     ).reset_index()
 
-    # Dataset ids are only unique within an experiment, so key references on both.
+    # Keep ratios only where both algorithms solve the same optimization problem.
+    # Utility: capacity-aware utility optimizers (plus greedy as a heuristic) are
+    # compared to capacitated_flow. weighted joins only when every capacity is 1.
+    # Count: compare feasible coverage heuristics and fairness/max-cardinality to
+    # the capacity-aware max-cardinality optimum; capacity-1 cardinality joins only
+    # on fixed-capacity-one instances.
     ref_u = (table[table["algorithm"] == UTILITY_REFERENCE][["experiment", "dataset", "utility"]]
              .rename(columns={"utility": "ref_utility"}))
     ref_n = (table[table["algorithm"] == COUNT_REFERENCE][["experiment", "dataset", "assigned"]]
              .rename(columns={"assigned": "ref_assigned"}))
     table = table.merge(ref_u, on=["experiment", "dataset"], how="left")
     table = table.merge(ref_n, on=["experiment", "dataset"], how="left")
-    table["utility_ratio"] = table["utility"] / table["ref_utility"]
+    table["utility_efficiency"] = table["utility"] / table["ref_utility"]
+    table["utility_ratio"] = table["utility_efficiency"]
+    same_capacity_one = (table["capacity_mode"] == "fixed") & (table["fixed_capacity"] == 1)
+    table.loc[~table["algorithm"].isin(["greedy_reference", "capacitated_flow"])
+              & ~((table["algorithm"] == "weighted") & same_capacity_one), "utility_ratio"] = np.nan
     table["assigned_ratio"] = table["assigned"] / table["ref_assigned"]
+    table.loc[(table["algorithm"] == "cardinality") & ~same_capacity_one, "assigned_ratio"] = np.nan
+    table.loc[table["algorithm"] == "weighted", "assigned_ratio"] = np.nan
     return table.drop(columns=["ref_utility", "ref_assigned"])
 
 
@@ -305,7 +316,7 @@ def grouped_bars(table, experiment, category, value, ylabel, title, figs_dir, na
 
 
 def plot_fairness_tradeoff(table, figs_dir):
-    have = table.dropna(subset=["fairness"])
+    have = table.dropna(subset=["fairness", "utility_efficiency"])
     if have.empty:
         print("[skip] fairness_vs_utility: no fairness_score in the results yet "
               "(no fairness metric is wired into the runner)")
@@ -313,10 +324,10 @@ def plot_fairness_tradeoff(table, figs_dir):
     fig, ax = plt.subplots(figsize=(6.5, 5))
     for algo in algo_sorted(have["algorithm"].unique()):
         g = have[have["algorithm"] == algo]
-        ax.scatter(g["utility_ratio"], g["fairness"], s=18, alpha=0.7, color=ALGO_COLOR.get(algo), label=algo)
-    ax.set_xlabel("total utility / best achievable utility")
-    ax.set_ylabel("fairness score")
-    ax.set_title("Fairness vs utility trade-off")
+        ax.scatter(g["utility_efficiency"], g["fairness"], s=18, alpha=0.7, color=ALGO_COLOR.get(algo), label=algo)
+    ax.set_xlabel("realized utility / max-total-utility allocation (descriptive)")
+    ax.set_ylabel("minimum assigned utility / 100")
+    ax.set_title("Fairness–utility outcome trade-off")
     ax.grid(True, alpha=0.3)
     ax.legend(fontsize=8)
     finish_figure(fig, figs_dir, "fairness_vs_utility")
@@ -344,6 +355,13 @@ def main(argv=None):
 
     summary = summary_by_algorithm(table)
     save_table(summary, args.tables, "summary_by_algorithm")
+    fairness = table.dropna(subset=["fairness"]).groupby("algorithm").agg(
+        datasets=("fairness", "count"), mean_min_normalized_utility=("fairness", "mean"),
+        min_min_normalized_utility=("fairness", "min"), mean_total_utility=("utility", "mean"),
+        mean_assigned=("assigned", "mean"),
+    ).reset_index()
+    if not fairness.empty:
+        save_table(fairness, args.tables, "fairness_summary")
 
     fits = complexity_fit(table, "week4_scaling", "agents") + complexity_fit(
         table, "week4_scaling_resources", "resources")

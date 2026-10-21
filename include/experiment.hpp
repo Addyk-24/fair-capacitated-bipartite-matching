@@ -33,8 +33,8 @@ using ResultCheckFn = std::function<std::string(const Instance&, const MatchingR
 void addResultCheck(const std::string& name, ResultCheckFn fn);
 void clearResultChecks();
 
-// Fairness metric computed from the instance and a valid result. Until a metric is
-// set, fairness_score stays at -1 and is logged as NA. If an algorithm already set
+// Optional custom metric computed from the instance and a valid result. By default,
+// the runner records minimum assigned utility / 100. If an algorithm already set
 // fairness_score (>= 0) it is left alone. Pass nullptr to remove the metric.
 using FairnessMetricFn = std::function<double(const Instance&, const MatchingResult&)>;
 void setFairnessMetric(FairnessMetricFn fn);
@@ -53,7 +53,7 @@ std::string resultsHeader();
 
 // Appends one row to `csv_path`, creating the file (and parent directories) and
 // writing the header first if needed. Returns "" on success, else an error message.
-// fairness_score is written as NA until a fairness metric is available.
+// fairness_score is written as NA only if it remains unavailable (< 0).
 std::string appendRecord(const std::string& csv_path, const RunRecord& record);
 
 }  // namespace daa
