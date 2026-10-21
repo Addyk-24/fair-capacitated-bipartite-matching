@@ -36,6 +36,9 @@ target_link_libraries(dataset_generator PRIVATE daa_core)
 add_executable(experiment_suite experiments/runners/experiment_suite.cpp)
 target_link_libraries(experiment_suite PRIVATE daa_core)
 
+add_executable(capacity_sweep experiments/runners/capacity_sweep.cpp)
+target_link_libraries(capacity_sweep PRIVATE daa_core)
+
 if(DAA_BUILD_TESTS)
   enable_testing()
 
@@ -50,6 +53,8 @@ if(DAA_BUILD_TESTS)
     tests/integration/test_pipeline.cpp
     tests/integration/test_suite.cpp
     tests/integration/test_weighted_adapter.cpp
+
+    tests/integration/test_capacitated_flow.cpp
   )
   # These read repository files (e.g. data/weighted/small_weighted.csv) by relative
   # path, so they run from the source directory.
